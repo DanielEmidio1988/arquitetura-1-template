@@ -1,4 +1,5 @@
 import { Request, Response } from "express"
+import { AccountBusiness } from "../business/AccountBusiness"
 import { AccountDatabase } from "../database/AccountDatabase"
 import { Account } from "../models/Account"
 import { AccountDB } from "../types"
@@ -6,17 +7,11 @@ import { AccountDB } from "../types"
 export class AccountController {
     public getAccounts = async (req: Request, res: Response) => {
         try {
-            const accountDatabase = new AccountDatabase()
-            const accountsDB: AccountDB[] = await accountDatabase.findAccounts()
+
+            const accountBusiness = new AccountBusiness()
+            const output = await accountBusiness.getAccount()
     
-            const accounts = accountsDB.map((accountDB) => new Account(
-                accountDB.id,
-                accountDB.balance,
-                accountDB.owner_id,
-                accountDB.created_at
-            ))
-    
-            res.status(200).send(accounts)
+            res.status(200).send(output)
         } catch (error) {
             console.log(error)
     
@@ -35,25 +30,11 @@ export class AccountController {
     public getAccountBalance = async (req: Request, res: Response) => {
         try {
             const id = req.params.id
+
+            const accountBusiness = new AccountBusiness()
+            const output = await accountBusiness.getAccountBalance(id)
     
-            const accountDatabase = new AccountDatabase()
-            const accountDB = await accountDatabase.findAccountById(id)
-    
-            if (!accountDB) {
-                res.status(404)
-                throw new Error("'id' não encontrado")
-            }
-    
-            const account = new Account(
-                accountDB.id,
-                accountDB.balance,
-                accountDB.owner_id,
-                accountDB.created_at
-            )
-    
-            const balance = account.getBalance()
-    
-            res.status(200).send({ balance })
+            res.status(200).send(output)
         } catch (error) {
             console.log(error)
     
@@ -72,42 +53,12 @@ export class AccountController {
     public createAccount = async (req: Request, res: Response) => {
         try {
             const { id, ownerId } = req.body
+            
+            const accountBusiness = new AccountBusiness()
+            const output = await accountBusiness.createAccount(id,ownerId)
+
     
-            if (typeof id !== "string") {
-                res.status(400)
-                throw new Error("'id' deve ser string")
-            }
-    
-            if (typeof ownerId !== "string") {
-                res.status(400)
-                throw new Error("'ownerId' deve ser string")
-            }
-    
-            const accountDatabase = new AccountDatabase()
-            const accountDBExists = await accountDatabase.findAccountById(id)
-    
-            if (accountDBExists) {
-                res.status(400)
-                throw new Error("'id' já existe")
-            }
-    
-            const newAccount = new Account(
-                id,
-                0,
-                ownerId,
-                new Date().toISOString()
-            )
-    
-            const newAccountDB: AccountDB = {
-                id: newAccount.getId(),
-                balance: newAccount.getBalance(),
-                owner_id: newAccount.getOwnerId(),
-                created_at: newAccount.getCreatedAt()
-            }
-    
-            await accountDatabase.insertAccount(newAccountDB)
-    
-            res.status(201).send(newAccount)
+            res.status(201).send(output)
         } catch (error) {
             console.log(error)
     

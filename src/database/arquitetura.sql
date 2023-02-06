@@ -1,4 +1,4 @@
--- Active: 1675254981881@@127.0.0.1@3306
+-- Active: 1675686544772@@127.0.0.1@3306
 CREATE TABLE users (
     id TEXT PRIMARY KEY UNIQUE NOT NULL,
     name TEXT NOT NULL,
@@ -14,6 +14,10 @@ CREATE TABLE accounts (
     created_at TEXT DEFAULT (DATETIME()) NOT NULL,
     FOREIGN KEY (owner_id) REFERENCES users (id)
 );
+
+SELECT * FROM users;
+
+SELECT * FROM accounts;
 
 INSERT INTO users (id, name, email, password)
 VALUES
